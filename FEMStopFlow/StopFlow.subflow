@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmFlowOrder.msgnode="ComIbmFlowOrder.msgnode" xmlns:ComIbmJavaCompute.msgnode="ComIbmJavaCompute.msgnode" xmlns:ComIbmPassthru.msgnode="ComIbmPassthru.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:mbmonitor="http://www.ibm.com/wbi/2008/eflow_mbmonitor" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="StopFlow.subflow"
+    nsPrefix="StopFlow.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" useDefaults="true" udpSupport="true">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="StopFlow" bundleName="StopFlow" pluginId="FEMStopFlow"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMStopFlow/icons/full/obj16/StopFlow.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMStopFlow/icons/full/obj30/StopFlow.gif"/>
+    <shortDescription xmi:type="utility:ConstantString" string="Stop the Containing Message Flow "/>
+    <longDescription xmi:type="utility:ConstantString" string="This subflow performs the following:&#xD;&#xA;&#x9;Determines identity of the containing message flow.&#xD;&#xA;&#x9;Issues a request to the IIB node (broker) to stop the containing message flow&#xD;&#xA;&#x9;Sets Exception Mode On (fail safe against multi-threaded containing message flows&#xD;&#xA;&#x9;Emits an IIB Monitoring Event - FATAL event&#xD;&#xA;&#x9;Ends such that the containing flow can be stopped."/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="20,20">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="StopFlow" pluginId="FEMStopFlow"/>
+      </nodes>
+      <nodes xmi:type="ComIbmJavaCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="196,35" javaClass="com.ibm.fem.control.StopFlow_AsyncStopFlow">
+        <translation xmi:type="utility:ConstantString" string="AsyncStopFlow"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Obtain a handle to the containing message flow in which we are running and then issue a request to the Integration Node (broker) to stop the flow"/>
+        <longDescription xmi:type="utility:ConstantString" string="In obtaining the handle to the containing message flow the code will check whether the message flow is deployed in an application container or deployed as an independent resource (i.e. a message flow in a message flow project). In the latter case the code will obtain the handle directly from the execution group administered object."/>
+      </nodes>
+      <nodes xmi:type="ComIbmFlowOrder.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="480,46">
+        <translation xmi:type="utility:ConstantString" string="Flow Order"/>
+      </nodes>
+      <nodes xmi:type="ComIbmPassthru.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="629,46">
+        <translation xmi:type="utility:ConstantString" string="EmitFatalEvent"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Emit a FATAL event via the IIB monitoring framework to alert the operator that something has gone very wrong and the message flow has been stopped"/>
+        <monitorEvents eventSourceDescription="In terminal" eventSourceName="EmitFatalEvent.terminal.in" eventIdentity="FATAL.IOBK.STOPFLOW">
+          <eventXMLDoc xmi:type="mbmonitor:MonitorEvent">
+            <globalTransactionCorrelator/>
+            <parentTransactionCorrelator/>
+            <localTransactionCorrelator/>
+            <bitStreamData encoding="base64Binary"/>
+            <eventName literal="FATAL.IOBK.STOPFLOW"/>
+            <eventFilter dataLocation="true()" isXPath="true"/>
+          </eventXMLDoc>
+        </monitorEvents>
+      </nodes>
+      <nodes xmi:type="ComIbmJavaCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="612,130" javaClass="com.ibm.fem.control.StopFlow_SleepWhileAsyncStop">
+        <translation xmi:type="utility:ConstantString" string="SleepWhileAsyncStop"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Issue a short sleep of this message flow (thread) while the broker is stopping the containing message flow."/>
+        <longDescription xmi:type="utility:ConstantString" string="As we should be single threaded in order to maintain sequence and this message flow issued the request to stop the flow I would not expect any new messages to be processed. "/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="294,45" computeExpression="esql://routine/#StopFlow_SetExceptionModeOn.Main">
+        <translation xmi:type="utility:ConstantString" string="SetExceptionModeOn"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Set Exception Mode to ON. Stop any new messages being processed while the containing message flow is being stopped."/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="78,91" computeExpression="esql://routine/#StopFlow_GetAppandFlowName.Main">
+        <translation xmi:type="utility:ConstantString" string="GetAppAndFlowName"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Use ESQL to get name of the containing message flow and the name of the containing application"/>
+        <longDescription xmi:type="utility:ConstantString" string="The name of the containing message flow and the name of the containing application(optional) will be used by the AsyncStopflow Java code to request that integration node (broker) stop the containing message flow"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.first" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.second" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_6" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

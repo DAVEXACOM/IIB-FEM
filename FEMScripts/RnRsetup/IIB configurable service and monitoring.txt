@@ -1,0 +1,40 @@
+mqsisetdbparms IB9NODE -n FEMDB -u db2admin -p db2admin
+mqsisetdbparms IB9NODE -n FEMDB -u davearno -p blah
+
+mqsicvp -n FEMDB -u db2admin -p db2admin
+mqsicvp -n FEMDB -u davearno -p blah
+
+
+mqsicreateconfigurableservice IB9NODE
+mqsichangeproperties IB9NODE -c DataCaptureStore -o FEMRECORD -n backoutQueue,commitCount,commitIntervalSecs,dataSourceName,egForRecord,egForView,queueName,schema,threadPoolSize,useCoordinatedTransaction  -v "SYSTEM.BROKER.DC.BACKOUT","10","5","FEMDB","FEMRNR","FEMRNR","SYSTEM.BROKER.DC.RECORD","","10","false"
+
+mqsicreateconfigurableservice IB9NODE -c DataCaptureSource -o FEMSOURCE1 -n dataCaptureStore,topic  -v "FEMRECORD","$SYS/Broker/IB9NODE/Monitoring/FEMRNR/#"
+mqsichangeproperties          IB9NODE -c DataCaptureSource -o FEMSOURCE1 -n dataCaptureStore,topic  -v "FEMRECORD","$SYS/Broker/IB9NODE/Monitoring/FEMRNR/#"
+
+-- dest for redirect all queue in IOBK subflow
+mqsicreateconfigurableservice IB9NODE
+mqsichangeproperties IB9NODE -c DataDestination -o BUSID1_SCIDA_SYSNAMEX_EMPS_IOBKREDIRALL -n egForReplay,endpoint,endpointType  -v "FEMRNR","wmq:/msg/queue/BUSID1.SCIDA.SYSNAMEX.EMPS.IOBKREDIRALL@IB9QMGR","WMQDestination"
+
+-- dest for redirect first queue in IOBK subflow
+mqsicreateconfigurableservice IB9NODE
+mqsichangeproperties IB9NODE -c DataDestination -o BUSID1_SCIDA_SYSNAMEX_EMPS_IOBKREDIRFIRST -n egForReplay,endpoint,endpointType  -v "FEMRNR","wmq:/msg/queue/BUSID1.SCIDA.SYSNAMEX.EMPS.IOBKREDIRFIRST@IB9QMGR","WMQDestination"
+
+-- dest for replay queue in IOBK subflow
+mqsicreateconfigurableservice IB9NODE
+mqsichangeproperties IB9NODE -c DataDestination -o BUSID1_SCIDA_SYSNAMEX_EMPS_IOBKREPLAY -n egForReplay,endpoint,endpointType  -v "FEMRNR","wmq:/msg/queue/BUSID1.SCIDA.SYSNAMEX.EMPS.IOBKREPLAY@IB9QMGR","WMQDestination"
+
+-- dest for redirect all perm queue in IOBK subflow
+mqsicreateconfigurableservice IB9NODE
+mqsichangeproperties IB9NODE -c DataDestination -o BUSID1_SCIDA_SYSNAMEX_EMPS_IOBKREDIRALLPERM -n egForReplay,endpoint,endpointType  -v "FEMRNR","wmq:/msg/queue/BUSID1.SCIDA.SYSNAMEX.EMPS.IOBKREDIRALLPERM@IB9QMGR","WMQDestination"
+
+-- dest for redirect all clear queue in IOBK subflow
+mqsicreateconfigurableservice IB9NODE
+mqsichangeproperties IB9NODE -c DataDestination -o BUSID1_SCIDA_SYSNAMEX_EMPS_IOBKREDIRPERMCLEAR -n egForReplay,endpoint,endpointType  -v "FEMRNR","wmq:/msg/queue/BUSID1.SCIDA.SYSNAMEX.EMPS.IOBKREDIRPERMCLEAR@IB9QMGR","WMQDestination"
+
+-- dest for original input queue
+mqsicreateconfigurableservice IB9NODE
+mqsichangeproperties IB9NODE -c DataDestination -o FEM.UPSTREAM.FEED.Q -n egForReplay,endpoint,endpointType  -v "FEMRNR","wmq:/msg/queue/FEM.UPSTREAM.FEED.Q@IB9QMGR","WMQDestination"
+
+mqsichangeflowmonitoring IB9NODE -c active -e FEMRNR -j
+
+

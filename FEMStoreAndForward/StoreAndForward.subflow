@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmReSequence.msgnode="ComIbmReSequence.msgnode" xmlns:ComIbmRoute.msgnode="ComIbmRoute.msgnode" xmlns:ComIbmThrow.msgnode="ComIbmThrow.msgnode" xmlns:ComIbmTrace.msgnode="ComIbmTrace.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="StoreAndForward.subflow" nsPrefix="StoreAndForward.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" useDefaults="true" udpSupport="true">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.correlationPath" name="correlationPath" defaultValueLiteral="concat($InputRoot/DFDL/sampleRecs/record[1]/groupID ,$InputRoot/DFDL/sampleRecs/record[1]/DataID)">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="StoreAndForward" bundleName="StoreAndForward" pluginId="FEMStoreAndForward"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMStoreAndForward/icons/full/obj16/StoreAndForward.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMStoreAndForward/icons/full/obj30/StoreAndForward.gif"/>
+    <shortDescription xmi:type="utility:ConstantString" string="StoreAndForward contains the Resequence node configured in Retry Mechanism = 'failure' mode. This causes the resequence node to catch failed messages and &quot;block&quot; subsequent messages with the same sequence groupID"/>
+    <longDescription xmi:type="utility:ConstantString" string="The Resequence node has been enhanced in IIB v9.0.0.2 via an iFix to add the Retry Mechanism mode (to enable StoreAndForward style processing). This subflow cannot be used without the iFix.&#xD;&#xA;&#xD;&#xA;StoreAndForward contains the Resequence node configured in Retry Mechanism = 'failure' mode. &#xD;&#xA;This causes the resequence node to catch failed messages and &quot;block&quot; subsequent messages with the same sequence groupID.&#xD;&#xA;The resequence node assigns a sequence number to messages by sequence groupID (i.e. it is tolerant of no sequence number)&#xD;&#xA;The path to sequence group ID on the Resequence node is a promoted property that identifies how a developer wants to group their messages - an employee ID for example.&#xD;&#xA;All other parameters on the Resequence node can be left as configured.&#xD;&#xA;&#xD;&#xA;The StoreAndForward subflow also uses a filter node to identify if a Failure Event is due to a downstream error being thrown back to the resequence node or of the resequence node itself has suffered an exception.&#xD;&#xA;If the resequence node itself suffers an exception then the Failed Event is not propagated on as downstream failure. Instead it is thrown back to be caught upstream as a FATAL error.&#xD;&#xA;It should then trigger the stopping of the containing message flow."/>
+    <composition>
+      <nodes xmi:type="ComIbmReSequence.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="245,167" sequencePath="$LocalEnvironment/Sequence/Number" missingMessageTimeout="99999999" startOfSequence="01" endOfSequence="2300" retryMechanism="failure">
+        <translation xmi:type="utility:ConstantString" string="Resequence"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Resequence Node configured in Retry Mechanism = Failure mode."/>
+        <longDescription xmi:type="utility:ConstantString" string="The Resequence node running in failure mode will catch downstream exceptions and propagate them to its failure terminal.&#xD;&#xA;It will then block messages (storing them on MQ system queues) of the same Sequence GroupID until the original failure message is fed back into the Resequence Node via the Failed Event Management Wrapper, Tooling Wrapper and operational tooling.&#xD;&#xA;&#xD;&#xA;Basic Properties&#xD;&#xA;&#x9;Path to Sequence Number: $LocalEnvironment/Sequence/Number&#xD;&#xA;&#x9;Path to Sequence Group ID: Promoted (repeatedly through the StoreAndForward/Wrapper/ToolingWrapper) to containing message flow to be set by the developer. The Group ID is the &quot;key&quot; typically made up of one &#x9;of more elements from the headers or data payload by which the resequence node will group messages.&#xD;&#xA;&#x9;Missing Message Timeout: 999999&#xD;&#xA;&#x9;Start of Sequence Definition: Literal:1&#xD;&#xA;&#x9;End of Sequence Definition: Automatic:300 (seconds of inactivity for that groupID)&#xD;&#xA;Advanced Properties&#xD;&#xA;&#x9;Persistence Mode: Non-persistent for testing purposes ( restarting the queue manager will clean up the grouping messages and events on the systems queues.&#xD;&#xA;&#x9;Persistence Mode: Persistent may be the preferred setting for production&#xD;&#xA;Retry Properties&#xD;&#xA;&#x9;Retry Mechanism: Failure&#xD;&#xA;Instances&#xD;&#xA;&#x9;Additional Instances: 0  - The output side of the resequence node is a separate thread. Single thread the output side such that sequence is maintained.&#xD;&#xA;&#xD;&#xA;"/>
+      </nodes>
+      <nodes xmi:type="ComIbmRoute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="390,238">
+        <outTerminals terminalNodeID="Match" dynamic="true" label="Match"/>
+        <translation xmi:type="utility:ConstantString" string="Is Downstream Error OR ReseqFailure"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Filter out exceptions thrown by the Resequence Node itself"/>
+        <longDescription xmi:type="utility:ConstantString" string="If the Resequence node itself failed rather than a downstream error there will be no LocalEnvironment/Sequence/Group. Resequence Node exceptions will be thrown back to the containing message flow as a FATAL error. The containing message flow should then be stopped."/>
+        <filterTable filterPattern="count($LocalEnvironment/Sequence/Group) != 0" routingOutputTerminal="Match"/>
+      </nodes>
+      <nodes xmi:type="ComIbmThrow.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="661,145" messageNumber="3049" messageText="Resequence Node Error">
+        <translation xmi:type="utility:ConstantString" string="ThrowOnReseqNodeError"/>
+        <shortDescription xmi:type="utility:ConstantString" string="3001 to 3049 available for users"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="302,108" destination="file" filePath="c:\temp\FEM\traces\TrcSaFReseqOut.txt" pattern="--LocalEnvironment&#xD;&#xA;${LocalEnvironment}&#xD;&#xA;-- RFH groupid&#xD;&#xA;${Root.MQRFH2.usr.IOBK.SeqGroupID}&#xD;&#xA;-- payload&#xD;&#xA;${Root}">
+        <translation xmi:type="utility:ConstantString" string="TrcSaFReseqOut"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_13" location="314,213" destination="file" filePath="c:\temp\FEM\traces\TrcSaFReseqFail.txt" pattern="${Root}&#xD;&#xA;-- local env&#xD;&#xA;${LocalEnvironment}&#xD;&#xA;--except list&#xD;&#xA;${ExceptionList}">
+        <translation xmi:type="utility:ConstantString" string="TrcSaFReseqFail"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="52,167">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.In" bundleName="StoreAndForward" pluginId="FEMStoreAndForward"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Servicing: Inbound messages from the containing message flow via the Wrapper"/>
+        <longDescription xmi:type="utility:ConstantString" string="Data content - Transport Headers:MQRFH2:payload data"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output3" location="859,108">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Out" bundleName="StoreAndForward" pluginId="FEMStoreAndForward"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Driving: Downstream processing out through the Failed Event Wrapper"/>
+        <longDescription xmi:type="utility:ConstantString" string="Messages that will flow through this terminal are: First time , replayed, redirecting, control and linked (unblocked)"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output" location="859,246">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Failure" bundleName="StoreAndForward" pluginId="FEMStoreAndForward"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Driving: Failed Events back to the Failed Event Wrapper"/>
+        <longDescription xmi:type="utility:ConstantString" string="Messages that have failed to be delivered downstream will flow through this terminal having been thrown back and caught by the Resequence Node configured for Retry Mechanism = Failure&#xD;&#xA;If the resequence node itself suffers an exceptions that will have been filtered out and thrown back."/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="131,167" destination="file" filePath="c:\temp\FEM\traces\TrcSaFIn.txt" pattern="-- rfh&#xD;&#xA;${Root.MQRFH2}&#xD;&#xA;-- payload&#xD;&#xA;${Root}&#xD;&#xA;--LocalEnvironment&#xD;&#xA;${LocalEnvironment}">
+        <translation xmi:type="utility:ConstantString" string="TrcSaFIn"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="585,200" destination="file" filePath="c:\temp\FEM\traces\TrcSaFReseqNodeErr.txt" pattern="${Root}&#xD;&#xA;-- local env&#xD;&#xA;${LocalEnvironment}&#xD;&#xA;--except list&#xD;&#xA;${ExceptionList}">
+        <translation xmi:type="utility:ConstantString" string="TrcSaFReseqNodeErr"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_13" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_13" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_31" targetNode="FCMComposite_1_2" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_32" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="OutTerminal.Output" sourceNode="FCMComposite_1_6" sourceTerminalName="Match" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="OutTerminal.Output3" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.default" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Basic" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.xpath.XPathPropertyEditor:InputRoot,InputLocalEnvironment,InputBody,InputEnvironment,Root,LocalEnvironment,Body,Environment" describedAttribute="Property.correlationPath">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.correlationPath" bundleName="ComIbmReSequence" pluginId="com.ibm.etools.mft.ibmnodes"/>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <attributeLinks promotedAttribute="Property.correlationPath" overriddenNodes="FCMComposite_1_1">
+      <overriddenAttribute href="ComIbmReSequence.msgnode#Property.correlationPath"/>
+    </attributeLinks>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

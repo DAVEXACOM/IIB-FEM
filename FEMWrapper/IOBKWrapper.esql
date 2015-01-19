@@ -1,0 +1,231 @@
+--
+-- Inject and initialize the MQRFH2. Ensure the data payload is reattached to the correct parser branch in the message tree
+--
+CREATE COMPUTE MODULE IOBKWrapper_AddRFH2
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		CALL CopyMessageHeaders();
+
+	SET OutputRoot.MQRFH2.(MQRFH2.Field)Version = 2;
+	SET OutputRoot.MQRFH2.(MQRFH2.Field)Format = 'MQSTR';
+	SET OutputRoot.MQRFH2.(MQRFH2.Field)NameValueCCSID = 1208;
+    SET OutputRoot.MQRFH2.usr.IOBK.SeqGroupID = ''; -- create an empty field for the seq group id      
+	SET OutputRoot.MQRFH2.usr.IOBK.SeqNum = ''; -- create an empty field for the seq num
+	SET OutputRoot.MQRFH2.usr.IOBK.CtrlMsg = 'N'; -- N or Y
+	SET OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'not set'; -- not set indicates this is not a replayed message
+	
+-- Now attach the data payload after the RFH2 header to the correct parser in the OutputRoot. and return true for propagation to Out terminal
+	IF EXISTS(InputRoot.DFDL.*[]) THEN SET OutputRoot.DFDL = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.XMLNSC.*[]) THEN SET OutputRoot.XMLNSC = InputBody; RETURN TRUE; END IF;	
+	IF EXISTS(InputRoot.BLOB.BLOB.*[]) THEN SET OutputRoot.BLOB.BLOB = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.XML.*[]) THEN SET OutputRoot.XML = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.XMLNS.*[]) THEN SET OutputRoot.XMLNS = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.JSON.*[]) THEN SET OutputRoot.JSON = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.MIME.*[]) THEN SET OutputRoot.MIME = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.MRM.*[]) THEN SET OutputRoot.MRM = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.JMSMap.*[]) THEN SET OutputRoot.JMSMap = InputBody; RETURN TRUE; END IF;
+	IF EXISTS(InputRoot.JMSStream.*[]) THEN SET OutputRoot.JMSStream = InputBody; RETURN TRUE; END IF;
+	
+-- If we get here we have an unknown parser on entry to StoreAndForward Error 3048
+	THROW USER EXCEPTION CATALOG 'BIPmsgs' MESSAGE 3048 VALUES('Unknown parser on input');  							
+	RETURN FALSE; -- already propagated so return false
+	END;
+			 
+	CREATE PROCEDURE CopyMessageHeaders() BEGIN
+		DECLARE I INTEGER 1;
+		DECLARE J INTEGER;
+		SET J = CARDINALITY(InputRoot.*[]);
+		WHILE I < J DO
+			SET OutputRoot.*[I] = InputRoot.*[I];
+			SET I = I + 1;
+		END WHILE;
+	END;
+END MODULE;
+--
+-- Restore sequence number from the MQRFH for use by the StoreAndForward (resequence node) subflow
+-- Manage the Redirected Group ID list dependent on ReplayAction type.
+-- ReplayOnly: 			 Don't add an entry to the list 
+-- RedirectFirstOnly:	 Add a GroupID entry to the list
+-- RedirectAll:			 Add a GroupID entry to the list and mark it as ALL=Y in the list			
+-- RedirectAllPermanent: Add a GroupID entry to the list and mark it as PERM=Y in the list		
+-- ClearRedirectAllPerm: Remove an entry from the GroupID list
+--
+-- RedirIDList SHARED ROW - IDs[n].ID or IDs[n].ID + IDs[n].ID.PERM or IDs[n].ID + IDs[n].ID.ALL
+-- RedirIDCount SHARED INTEGER - number of entries in the list
+--
+CREATE COMPUTE MODULE IOBKWrapper_RestoreSeqNum_SetRedir
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+		-- copy sequence number from MQRFH to LocalEnvironment.Sequence.Number for use by the StoreAndForward (resequence node) subflow
+		Set OutputLocalEnvironment.Sequence.Number = CAST(OutputRoot.MQRFH2.usr.IOBK.SeqNum AS INTEGER);
+		-- Set up the redirection groupID list for the far side of the StoreAndForward dependent on replayAction type	
+		IF (OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'ReplayOnly') 	 	  THEN -- do not add an entry
+			RETURN TRUE;
+		END IF; 
+		
+		DECLARE myRet BOOLEAN false;		
+		IF (OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'ClearRedirectAllPerm') THEN -- remove an IDs[n]entry
+			-- manual remove from groupID for redirection list do not propagate			
+		    CALL AddRemRedirlist('remove', OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet;
+			RETURN FALSE;	
+		END IF;			
+		
+		IF (OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'RedirectFirstOnly')    THEN -- add an ID[n].ID entry with value = groupID
+		    CALL AddRemRedirlist('add', OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet;
+			RETURN TRUE;		    			 
+		END IF;
+		 
+		IF (OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'RedirectAll') 		  THEN -- add an ID[n].ID entry with value = groupID and a child .ALL with value 'Y'
+		    CALL AddRemRedirlist('addall', OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet;
+		    RETURN TRUE;		    			 
+		END IF;
+		 
+		IF (OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'RedirectAllPermanent') THEN -- add an ID[n].ID entry with value = groupID and a child .PERM with value 'Y'
+		    CALL AddRemRedirlist('addperm', OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet;
+		    RETURN TRUE;			 
+		END IF;
+		-- If we get here we have an unsupport replay action
+		THROW USER EXCEPTION CATALOG 'BIPmsgs' MESSAGE 2998 VALUES('Unsupported replay action:',OutputRoot.MQRFH2.usr.IOBK.ReplayAction);  							
+	END;
+END MODULE;
+
+-- IOBKWrapper_SaveGrpID_ChkCtrlMsg_RedirRoute
+-- If CtrlMsg - check if redirecting, check if LastInBatch, remove from RedirList for RedirectAll if LastInBatch but not RedirectPerm, discard CtrlMsg
+-- If not CtrlMsg - Check if Redirecting
+--		If Redirecting - Are we RedirectFirst, RedirectAll or RedirectPerm?
+-- 				If RedirectFirst - remove GroupID from RedirList, strip RFH2 and propagate for redirection
+--				If RedirectAll - Are we LastInBatch?
+--					If LastInBatch 	   - remove GroupID from RedirList, strip RFH2 and propagate for redirection
+--					If NOT LastInBatch - strip RFH2 and propagate for redirection
+--				If RedirectPerm - strip RFH2 and propagate for redirection
+--				If ClearRedirectPerm - remove GroupID from RedirList DO NOT propagate at all !!! This should have already happened in IOBKWrapper_RestoreSeqNum_SetRedir
+--
+
+--
+-- LastInBatch commentary - the element LocalEnvironment/Sequence/LastInBatch.  This will be set to true if, when the message is being propagated, the ReSequence Node currently has no other messages in the same sequence group ready to be delivered.
+-- So when there are a batch of messages for delivery, only the last one will have this set to true.
+-- This has an interesting side-effect in that if there are no messages being held, then the next message in will be seen as a "batch of one message" and will have this set to true.  This means that when everything is working fine,
+-- every message will have this set to true, because every message believes that there is nothing queued up behind it.
+-- Control messages can be last in batch but this is not always the case
+
+CREATE COMPUTE MODULE IOBKWrapper_SaveGrpID_ChkCtrlMsg_RedirRoute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+	SET OutputRoot = InputRoot;
+	DECLARE myRet2 BOOLEAN false;
+	-- store the groupID we'll need it for redirect list checking if we are redirecting replays or a LastInBatch on a control message for a redirecting group id									
+	Set OutputRoot.MQRFH2.usr.IOBK.SeqGroupID = InputLocalEnvironment.Sequence.Group;	
+	-- If this is a control message we fed back (on initial failure)to hold the seq group open do not propagate it but we must check if it is a LastInBatch for a redirecting group.
+	IF InputRoot.MQRFH2.usr.IOBK.CtrlMsg = 'Y' THEN
+    -- so if it is a last in batch ... was this groupID in RedirectAllPerm mode? We can't rely on replayAction it is 'not set' for control messages so check the RedirList
+		   			IF (InputLocalEnvironment.Sequence.LastInBatch = true) THEN
+		       			CALL AddRemRedirlist('check',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+		       			IF myRet2 IS TRUE THEN -- we are redirecting but are we a redirect permanent
+		       				CALL AddRemRedirlist('checkperm',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+		       				IF myRet2 IS TRUE THEN -- we area redirect permanent
+		       					-- so do not remove the groupID from the redirect list
+		       				ELSE
+		       					-- must be a Redirectall as redirectfirst will have removed the entry on the first replayed message
+		       					-- Save myself a checkall call it as is must be a RedirectAll	 
+		       					CALL AddRemRedirlist('remove',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+		       				END IF; 	
+		       			END IF;        
+		   			END IF;			   			
+			-- throw it away -- do not wire Out for downstream			
+			PROPAGATE TO TERMINAL 'out'; --to Out terminal - discard the control message
+			RETURN FALSE;
+	ELSE -- else this is not a control message
+	-- all non-control message will be propagated. Iits a first time through message, an actual replay, release message or brand new message after a batch has been released
+    -- is this GroupID being redirected? Check the RedirList because a linked(blocked) message will have a ReplayAction of 'not set'.
+            CALL AddRemRedirlist('check',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+        	IF (myRet2 IS TRUE) THEN
+		    -- we are Redirecting
+				IF (OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'RedirectFirstOnly') THEN
+			   -- Redirect the original then remove the GroupID from the RedirList to let the linked (unblocked) messages continue via original routing. Linked messages will jump this if (ReplayAction = 'not set').				
+                    -- remove from the GroupID from a redirect list		   	
+                    CALL AddRemRedirlist('remove',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+				    -- we are leaving the wrapper so strip the RFH
+    				Set OutputRoot.MQRFH2 = null;	
+    				PROPAGATE TO TERMINAL 'out1'; -- to Out1 - route for redirection
+    				RETURN FALSE;					                        		
+				END IF;		        		       		
+ 		       -- we are Redirecting. check for redirectall
+            	CALL AddRemRedirlist('checkall',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+        		IF (myRet2 IS TRUE) THEN
+        			-- We are redirecting the original and all linked(unblocked) messages for that group id therefore
+		            -- don't remove the GroupID unless we have a Last In Batch. Linked(unblocked) messages will continue to come here until Last in batch		
+		   			IF (InputLocalEnvironment.Sequence.LastInBatch = true) THEN
+                        -- remove from the GroupID from a redirect list		   	
+                        CALL AddRemRedirlist('remove',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;	        
+		   			END IF;
+				    -- we are leaving the wrapper so strip the RFH
+    				Set OutputRoot.MQRFH2 = null;	
+    				PROPAGATE TO TERMINAL 'out1'; -- to Out1 - route for redirection
+    				RETURN FALSE;					
+				END IF;
+		        --we are Redirecting. check for redirectperm 
+		       	CALL AddRemRedirlist('checkperm',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+		       	IF myRet2 IS TRUE THEN 
+		       		-- we area redirecting the original, and all linked(unblocked) messages and all future messages for this group until manual reset					
+					-- don't remove this GroupID from the redirect list. A ClearRedirectAllPerm replayAction will do this.
+				    -- we are leaving the wrapper so strip the RFH
+    				Set OutputRoot.MQRFH2 = null;	
+    				PROPAGATE TO TERMINAL 'out1'; -- to Out1 - route for redirection
+    				RETURN FALSE;					
+				END IF;	
+		        -- we are Rediecting. Check for a ClearRedirectAllPerm 
+				IF (OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'ClearRedirectAllPerm') THEN
+					-- Clearing the RedirectAllPermanent from the RedirList - we should never get this here!!! It should have been cleared and not propagated on the input side.
+			   		CALL AddRemRedirlist('remove',OutputRoot.MQRFH2.usr.IOBK.SeqGroupID) INTO myRet2;
+					-- don't propagate this message it is a reset only	message only
+					RETURN FALSE;		 		
+				END IF;		
+        	ELSE -- else for - if we are redirecting
+				-- We are not Redirecting - remove the MQRFH2 before propagating
+				Set OutputRoot.MQRFH2 = null;
+				PROPAGATE TO TERMINAL 'out2'; -- to Out2 - we are not redirecting and not a control message so must be a first time message or straight replay -route to normal out path
+				RETURN FALSE;
+        	END IF; -- end if - for if we are redirecting					
+	END IF;-- end of If Ctrl Message - Ctrl message discarded via out terminal
+	
+	RETURN FALSE; -- already propagated to a terminal - should not get here.
+	END;
+	
+END MODULE;
+--
+-- Move the Sequence Number and Sequence Group ID to the MQRFH2 such that they survive the trip throught the ToolingWrapper and tooling.
+-- The exceptionlist is passed on it will be used by the ToolingWrapper to contruct the failed event
+--
+CREATE COMPUTE MODULE IOBKWrapper_SaveSeqNum
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- make sure the exceptionlist is passed on it will be used by the ToolingWrapper to contruct the failed event
+		Set OutputExceptionList = InputExceptionList;
+		SET OutputRoot = InputRoot;
+		-- copy the sequence number and the GroupID from the environment into the MQRFH2. Both need to survive the trip through the ToolingWrapper and tooling 
+		Set OutputRoot.MQRFH2.usr.IOBK.SeqNum 		= InputLocalEnvironment.Sequence.Number;
+		Set OutputRoot.MQRFH2.usr.IOBK.SeqGroupID	= InputLocalEnvironment.Sequence.Group;		
+		RETURN TRUE;
+	END;
+END MODULE;
+--
+-- A control message with the correct groupID needs to be fed back into the StoreAndForward (resequence node) subflow in order that the
+-- sequence group is held open. Mark the message as a control message MQRFH2.usr.IOBK.CtrlMsg = Y such that it can be filtered out when the 
+-- group id replayed. Note: On replay Control messages can be the LastInBatch (this is often but not always the case)
+-- The sequence group id is important resequence node in the StoreAndForward subflow will pick it up from the data based on the Path to Sequence Group ID	
+--
+CREATE COMPUTE MODULE IOBKWrapper_MarkAsControlHoldOpen
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+-- The data payload matters because the resequence node will pick up the sequence Group ID from the Path to Sequence Group ID
+	SET OutputRoot = InputRoot;
+-- CtrlMsg must be set.	
+	SET OutputRoot.MQRFH2.usr.IOBK.CtrlMsg = 'Y'; -- N or Y
+-- Clear the sequence number it is not relevant	
+	SET OutputRoot.MQRFH2.usr.IOBK.SeqNum = '';
+-- Don't copy the LocalEnvironment across such that the where is no LocalEnvironment.Sequence.xxx fields
+	
+		RETURN TRUE;
+	END;
+END MODULE;

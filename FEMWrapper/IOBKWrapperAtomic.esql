@@ -1,0 +1,100 @@
+DECLARE RedirIDList SHARED ROW;
+DECLARE RedirIDCount SHARED INTEGER 0;
+
+--@DA7 This function needs to be rewritten to combine add and addperm/add all plus check and checkperm/checkall
+--@DA7 It needs an IN (for setting perm/all or not perm/all indicator) and an OUT ( returning redir only, redir permanent, reedir all)
+--@DA7 this will avoid it being called for check and checkperm/checkall and running through the while loops twice 
+--@DA7 also a CASE/SWITCH would be more performant
+CREATE FUNCTION AddRemRedirlist(IN action CHAR, IN oRootToID REFERENCE ) RETURNS BOOLEAN 
+     BEGIN ATOMIC -- single thread this function. Wrapper is Multi-threaded on input side and has a separate output side thread.
+  			IF action = 'check' THEN
+					DECLARE myInt2 INTEGER 0;
+ 				    WHILE (myInt2 < RedirIDCount) DO
+			        	SET myInt2 = myInt2 + 1;
+			        	-- find the current GroupID in the Redirect list
+				        	IF RedirIDList.IDs[myInt2].ID = oRootToID THEN
+				        	-- we are redirecting	
+ 					       	RETURN TRUE;    	
+		       				END IF;
+			        END WHILE;
+			    --we are not redirecting    			        
+				RETURN FALSE; 			
+  			END IF;
+
+  			IF action = 'checkall' THEN
+					DECLARE myInt2 INTEGER 0;
+ 				    WHILE (myInt2 < RedirIDCount) DO
+			        	SET myInt2 = myInt2 + 1;
+			        	-- find the current GroupID in the Redirect list
+				        	IF RedirIDList.IDs[myInt2].ID = oRootToID THEN
+				        	-- we are redirecting
+				        	   IF RedirIDList.IDs[myInt2].ALL = 'Y' THEN	
+ 					       			RETURN TRUE;
+				        	   END IF;
+				        	   RETURN FALSE;    	
+		       				END IF;
+			        END WHILE;
+			    --we are not redirecting    			        
+				RETURN FALSE; 			
+  			END IF;		
+  			
+  			IF action = 'checkperm' THEN
+					DECLARE myInt2 INTEGER 0;
+ 				    WHILE (myInt2 < RedirIDCount) DO
+			        	SET myInt2 = myInt2 + 1;
+			        	-- find the current GroupID in the Redirect list
+				        	IF RedirIDList.IDs[myInt2].ID = oRootToID THEN
+				        	-- we are redirecting
+				        	   IF RedirIDList.IDs[myInt2].PERM = 'Y' THEN	
+ 					       			RETURN TRUE;
+				        	   END IF;
+				        	   RETURN FALSE;    	
+		       				END IF;
+			        END WHILE;
+			    --we are not redirecting    			        
+				RETURN FALSE; 			
+  			END IF;	  			
+-- add an ID[n].ID entry with value = groupID  			
+  			IF action = 'add' THEN
+  							-- increment the count of the groupIDs currently redirecting.
+					SET RedirIDCount = RedirIDCount+1;
+							-- add this groupID to the redirection list
+					SET RedirIDList.IDs[RedirIDCount].ID = oRootToID;
+					RETURN TRUE;				
+  			END IF;
+-- add an ID[n].ID entry with value = groupID and a child .ALL with value 'Y'  			
+  			IF action = 'addall' THEN
+  							-- increment the count of the groupIDs currently redirecting.
+					SET RedirIDCount = RedirIDCount+1;
+							-- add this groupID to the redirection list
+					SET RedirIDList.IDs[RedirIDCount].ID = oRootToID;
+					Set RedirIDList.IDs[RedirIDCount].ALL = 'Y';
+					RETURN TRUE;				
+  			END IF;
+-- add an ID[n].ID entry with value = groupID and a child .PERM with value 'Y'  			
+ 			IF action = 'addperm' THEN
+  							-- increment the count of the groupIDs currently redirecting.
+					SET RedirIDCount = RedirIDCount+1;
+							-- add this groupID to the redirection list
+					SET RedirIDList.IDs[RedirIDCount].ID = oRootToID;
+					Set RedirIDList.IDs[RedirIDCount].PERM = 'Y';
+					RETURN TRUE;				
+  			END IF;
+  			  			
+  			IF action = 'remove' THEN
+					DECLARE myInt2 INTEGER 0;
+ 				    WHILE (myInt2 < RedirIDCount) DO
+			        	SET myInt2 = myInt2 + 1;
+			        	-- find the current GroupID in the Redirect list
+				        	IF RedirIDList.IDs[myInt2].ID = oRootToID THEN
+ 					       	-- remove the current GroupID from the redirect lust	
+ 					       		DELETE FIELD RedirIDList.IDs[myInt2];
+ 					       	-- decrement the RedirIDCount
+ 					       		SET RedirIDCount = RedirIDCount-1;
+ 					       		RETURN TRUE;    	
+		       				END IF;
+			        END WHILE;
+  			END IF;
+  				
+         RETURN FALSE; 
+     END; 

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmFilter.msgnode="ComIbmFilter.msgnode" xmlns:ComIbmMQInput.msgnode="ComIbmMQInput.msgnode" xmlns:ComIbmThrow.msgnode="ComIbmThrow.msgnode" xmlns:ComIbmTrace.msgnode="ComIbmTrace.msgnode" xmlns:IOBKWrapper.subflow="IOBKWrapper.subflow" xmlns:StopFlow.subflow="StopFlow.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:mbmonitor="http://www.ibm.com/wbi/2008/eflow_mbmonitor" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="IOBKToolingWrapper.subflow" nsPrefix="IOBKToolingWrapper.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" useDefaults="true" udpSupport="true">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.FatalQueueName" name="FatalQueueName" lowerBound="1" defaultValueLiteral="dummy">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ReDirFirstQueueName" name="ReDirFirstQueueName" lowerBound="1" defaultValueLiteral="dummy">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ReDirAllQueueName" name="ReDirAllQueueName" lowerBound="1" defaultValueLiteral="dummy">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ReplayQueueName" name="ReplayQueueName" lowerBound="1" defaultValueLiteral="dummy">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ReDirAllPermQueueName" name="ReDirAllPermQueueName" lowerBound="1" defaultValueLiteral="dummy">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ReDirAllClearQueueName" name="ReDirAllClearQueueName" lowerBound="1" defaultValueLiteral="dummy">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.correlationPath" name="correlationPath" defaultValueLiteral="concat($InputRoot/DFDL/sampleRecs/record[1]/groupID ,$InputRoot/DFDL/sampleRecs/record[1]/DataID)">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="IOBKToolingWrapper" bundleName="IOBKToolingWrapper" pluginId="FEMToolingWrapper"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMToolingWrapper/icons/full/obj16/IOBKToolingWrapper.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMToolingWrapper/icons/full/obj30/IOBKToolingWrapper.gif"/>
+    <shortDescription xmi:type="utility:ConstantString" string="Failed Event Management Tooling Wrapper: Catches and Constructs an Event Message based on a downstream failure. Replays Failed Events. Stops the container Message Flow for upstream failures"/>
+    <longDescription xmi:type="utility:ConstantString" string=" This Tooling Wrapper implements the following Failed Event Management operator actions:&#xD;&#xA;&#xD;&#xA; ReplayOnly: &#x9;&#x9;&#x9;Replay the original failed event directing it to is original out path and release all blocked events of the same GroupID to the original out path&#xD;&#xA; RedirectFirstOnly:&#x9;       Redirect the original failed event to an alternative out path and release all blocked events of the same GroupID to the original out path&#xD;&#xA; RedirectAll:&#x9;&#x9;&#x9;Redirect the original failed event and all blocked events of the same GroupID to the alternative out path. &#x9;&#x9;&#x9;&#xD;&#xA; RedirectAllPermanent: Redirect the original failed event, all blocked events of the same GroupID and any new events of the same GroupID to the alternative out path&#xD;&#xA; ClearRedirectAllPerm:  Manually clear the RedirectAllPermanent for the GroupID - this function does not propagate the event to an out path.&#xD;&#xA;&#xD;&#xA;This example of a Failed Event Management tooling wrapper utilizes the IIB monitoring framework for failed event capture and the IIB Record and Replay as the operational tooling for logging and replay."/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="34,398">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="IOBKToolingWrapper" pluginId="FEMToolingWrapper"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Servicing: Inbound messages from the containing message flow"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output" location="916,188">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Out" bundleName="IOBKToolingWrapper" pluginId="FEMToolingWrapper"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Driving: The original processing route"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input1" location="33,466">
+        <translation xmi:type="utility:TranslatableString" key="InTerminal.Control" bundleName="IOBKToolingWrapper" pluginId="FEMToolingWrapper"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Servicing: Upstream error messages that cannot be resolved and require the containing message flow to be stopped."/>
+      </nodes>
+      <nodes xmi:type="StopFlow.subflow:FCMComposite_1" xmi:id="FCMComposite_1_1" location="369,466">
+        <translation xmi:type="utility:ConstantString" string="StopFlow"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Stop the Containing Message Flow "/>
+        <longDescription xmi:type="utility:ConstantString" string="This subflow performs the following:&#xD;&#xA;&#x9;Determines identity of the containing message flow.&#xD;&#xA;&#x9;Issues a request to the IIB node (broker) to stop the containing message flow&#xD;&#xA;&#x9;Sets Exception Mode On (fail safe against multi-threaded containing message flows&#xD;&#xA;&#x9;Emits an IIB Monitoring Event - FATAL event&#xD;&#xA;&#x9;Ends such that the containing flow can be stopped.&#xD;&#xA;"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output1" location="905,407">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Redirect" bundleName="IOBKToolingWrapper" pluginId="FEMToolingWrapper"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Driving: Failed Event Message redirection "/>
+        <longDescription xmi:type="utility:ConstantString" string="Driven if the following ReplayActions are used:&#xD;&#xA;&#x9;RedirectFirstOnly:&#x9;       Redirect the original failed event to an alternative out path and release all blocked events of the same GroupID to the original out path&#xD;&#xA;&#x9;RedirectAll:&#x9;&#x9;&#x9;&#x9;Redirect the original failed event and all blocked events of the same GroupID to the alternative out path. &#x9;&#x9;&#x9;&#xD;&#xA;&#x9;RedirectAllPermanent:  Redirect the original failed event, all blocked events of the same GroupID and any new events of the same GroupID to the alternative out path"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output2" location="907,472">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Catch" bundleName="IOBKToolingWrapper" pluginId="FEMToolingWrapper"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Not implemented at this time"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="16,25" queueName="dummy" messageDomainProperty="BLOB">
+        <translation xmi:type="utility:ConstantString" string="IOBK.REPLAY.IN"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Target MQ Queue for the ReplayOnly replays "/>
+        <longDescription xmi:type="utility:ConstantString" string="In this implementation of the ToolingWrapper a IIB DataDestination configurable service available to the IIB Record and Replay WebGUI references this queue&#xD;&#xA;The MQ Queue Name is a promoted property that the developer sets when he includes a ToolingWrapper in the containing message flow."/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="15,135" queueName="dummy" messageDomainProperty="BLOB">
+        <translation xmi:type="utility:ConstantString" string="IOBK.REDIRALL.IN"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Target MQ Queue for the RedirectAll replays"/>
+        <longDescription xmi:type="utility:ConstantString" string="In this implementation of the ToolingWrapper a IIB DataDestination configurable service available to the IIB Record and Replay WebGUI references this queue&#xD;&#xA;The MQ Queue Name is a promoted property that the developer sets when he includes a ToolingWrapper in the containing message flow."/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="209,135" computeExpression="esql://routine/#IOBKToolingWrapper_SetRedirectAllProcessing.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="SetRedirectAllProcessing"/>
+        <shortDescription xmi:type="utility:ConstantString" string="RedirectAll"/>
+        <longDescription xmi:type="utility:ConstantString" string="Redirect the original failed event and all blocked events of the same GroupID to the alternative out path. &#x9;&#x9;&#x9;&#xD;&#xA;"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="213,25" computeExpression="esql://routine/#IOBKToolingWrapper_SetReplayProcessing.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="SetReplayProcessing"/>
+        <shortDescription xmi:type="utility:ConstantString" string="ReplayOnly"/>
+        <longDescription xmi:type="utility:ConstantString" string="Replay the original failed event directing it to is original out path and release all blocked events of the same GroupID to the original out path"/>
+      </nodes>
+      <nodes xmi:type="ComIbmFilter.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="230,398" filterExpression="esql://routine/#IOBKToolingWrapper_ExceptionModeFlagSet.Main">
+        <translation xmi:type="utility:ConstantString" string="ExceptionModeFlagSet"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Test if Exception Mode is enabled. If enabled the flow is stopping so block new inbound messages."/>
+        <longDescription xmi:type="utility:ConstantString" string="In the event of a fatal / upstream failure the Tooling Wrapper will drive the StopFlow subflow. This direct the IIB node to stop the containing message flow. The StopFlow subflow will set ExceptionMode on during the stop message flow process. Should a new message arrive during the stop flow process an exception will be thrown. Provided that the containing message flow is single threaded no new messages will be received during the stop flow processing. The ExceptionModeFlag is a fail safe.&#xD;&#xA;&#xD;&#xA;Note To Developers: There may be a case for placing an ExceptionmodeFlagSet check on connections to the Wrapper subflow control terminal to stop replayed events being processed while the message flow is being stopped."/>
+      </nodes>
+      <nodes xmi:type="ComIbmThrow.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="490,410" messageNumber="3048" messageText="IOBK subflow exception mode ON the flow must be doing a forced stop for a fatal upstream error">
+        <translation xmi:type="utility:ConstantString" string="ThrowExpMode"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output3" location="917,254">
+        <translation xmi:type="utility:TranslatableString" key="OutTerminal.Failure" bundleName="IOBKToolingWrapper" pluginId="FEMToolingWrapper"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Delivering: Copies of the original failed event"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="486,103" destination="file" filePath="c:\temp\FEM\traces\TrcTWrpReplays.txt" pattern="-- RFH2&#xD;&#xA;${Root.MQRFH2}&#xD;&#xA;-- local environment&#xD;&#xA;${LocalEnvironment}&#xD;&#xA;-- root&#xD;&#xA;${Root}&#xD;&#xA;">
+        <translation xmi:type="utility:ConstantString" string="TrcTWrpReplays"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_14" location="759,239" computeExpression="esql://routine/#IOBKToolingWrapper_IOBKEvtMgr.Main">
+        <translation xmi:type="utility:ConstantString" string="IOBKEvtMgr"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Build the Failed Event Message including a bitstream of the original data payload."/>
+        <longDescription xmi:type="utility:ConstantString" string="The EvtMgr capture key information about the failed event and store it temporarily in the Environment&#xD;&#xA;This ToolingWrapper uses the IIB monitoring framework to emit details of the failed event and includes a bitstream of the original data.&#xD;&#xA;Note: The Wrapper will have inserted an MQRFH2 header at the head of the data. This houses key information (GroupID and sequence number) that must&#xD;&#xA;survive the trip through operator tooling. In this case the IIB Record and Replay service.&#xD;&#xA;The Evtmgr will use the Monitoring Tab to config the event. It populates the following event fields with information&#xD;&#xA;&#x9;Event Name&#x9;&#x9;&#x9;&#x9;&#x9;: $Environment/Exception/SaFUUID &#x9;- BrokerName.ExecutionGroupLabel.[ApplicationLabel].MessageFlowLabel - uniquely identify the origin of the event &#xD;&#xA;&#x9;Local Transaction correlator&#x9;: $Environment/Exception/chrNumber&#x9;- Exception Number&#xD;&#xA;&#x9;Parent Transaction correlator: $Environment/Exception/Text&#x9;&#x9;- Exception Text&#xD;&#xA;&#x9;Global Transaction correlator: $Environment/Exception/userText&#x9;- User Text"/>
+        <monitorEvents eventSourceDescription="Out terminal" eventSourceName="IOBKEvtMgr.terminal.out" eventIdentity="$Environment/SaFUUID">
+          <eventXMLDoc xmi:type="mbmonitor:MonitorEvent">
+            <applicationData dataLocation="$Root/DFDL/sampleRecs/record[1]/groupID+$Root/DFDL/sampleRecs/record[1]/DataID" isXPath="true" complexData="true"/>
+            <globalTransactionCorrelator dataLocation="$Environment/Exception/userText" eventCorrelation="dataLocation"/>
+            <parentTransactionCorrelator dataLocation="$Environment/Exception/Text" eventCorrelation="dataLocation"/>
+            <localTransactionCorrelator dataLocation="$Environment/Exception/chrNumber" eventCorrelation="dataLocation"/>
+            <bitStreamData encoding="base64Binary"/>
+            <eventName dataLocation="$Environment/SaFUUID" isXPath="true"/>
+            <eventFilter dataLocation="true()" isXPath="true"/>
+          </eventXMLDoc>
+        </monitorEvents>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="9,83" queueName="dummy" messageDomainProperty="BLOB">
+        <translation xmi:type="utility:ConstantString" string="IOBK.REDIRFIRST.IN"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Target MQ Queue for the RedirectFirst replays"/>
+        <longDescription xmi:type="utility:ConstantString" string="In this implementation of the ToolingWrapper a IIB DataDestination configurable service available to the IIB Record and Replay WebGUI references this queue&#xD;&#xA;The MQ Queue Name is a promoted property that the developer sets when he includes a ToolingWrapper in the containing message flow."/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="200,83" computeExpression="esql://routine/#IOBKToolingWrapper_SetRedirectFirstProcessing.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="SetRedirectFirstProcessing"/>
+        <shortDescription xmi:type="utility:ConstantString" string="RedirectFirstOnly"/>
+        <longDescription xmi:type="utility:ConstantString" string="Redirect the original failed event to an alternative out path and release all blocked events of the same GroupID to the original out path&#xD;&#xA;"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_15" location="29,310" queueName="dummy" messageDomainProperty="BLOB">
+        <translation xmi:type="utility:ConstantString" string="IOBK.FATAL.IN"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Target MQ Queue for the replay of FATAL events"/>
+        <longDescription xmi:type="utility:ConstantString" string="In this implementation of the ToolingWrapper a IIB DataDestination configurable service available to the IIB Record and Replay WebGUI references this queue&#xD;&#xA;The MQ Queue Name is a promoted property that the developer sets when he includes a ToolingWrapper in the containing message flow.&#xD;&#xA;&#xD;&#xA;FATAL events will be emitted by the IOBKEvtMgr and in this example ToolingWrapper appear in the IIB Record and Replay WebGUI. These events may be unrelated to an actual failed event and as such replaying for propagation my not be desirable. However, the operator may wish to clear this from his list of events. Replaying to the FATAL.IN DataDestination configurable service will clear the event. &#xD;&#xA;At this point in time the ToolingWrapper simply throws this event away. The implementation could be changed to drive one of the other supported ReplayActions."/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_17" location="152,310" destination="file" filePath="c:\temp\FEM\traces\TrcTWrpFatal.txt" pattern="-- root&#xD;&#xA;${Root}&#xD;&#xA;">
+        <translation xmi:type="utility:ConstantString" string="TrcTWrpFatal"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_16" location="3,246" queueName="dummy" messageDomainProperty="BLOB">
+        <translation xmi:type="utility:ConstantString" string="IOBK.REDIRPERMCLEAR.IN"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Target MQ Queue for the RedirectAllPermanent clear requests"/>
+        <longDescription xmi:type="utility:ConstantString" string="In this implementation of the ToolingWrapper a IIB DataDestination configurable service available to the IIB Record and Replay WebGUI references this queue&#xD;&#xA;The MQ Queue Name is a promoted property that the developer sets when he includes a ToolingWrapper in the containing message flow."/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_18" location="4,194" queueName="dummy" messageDomainProperty="BLOB">
+        <translation xmi:type="utility:ConstantString" string="IOBK.REDIRALLPERM.IN"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Target MQ Queue for the RedirectAllPermanent replays "/>
+        <longDescription xmi:type="utility:ConstantString" string="In this implementation of the ToolingWrapper a IIB DataDestination configurable service available to the IIB Record and Replay WebGUI references this queue&#xD;&#xA;The MQ Queue Name is a promoted property that the developer sets when he includes a ToolingWrapper in the containing message flow."/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_19" location="198,246" computeExpression="esql://routine/#IOBKToolingWrapper_ClearRedirectAllPermByGroupID.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="ClearRedirectAllPermByGroupID"/>
+        <shortDescription xmi:type="utility:ConstantString" string="ClearRedirectAllPerm"/>
+        <longDescription xmi:type="utility:ConstantString" string="Manually clear the RedirectAllPermanent for the GroupID - this function does not propagate the event to an out path.&#xD;&#xA;"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_20" location="203,194" computeExpression="esql://routine/#IOBKToolingWrapper_SetRedirectAllPermProcessing.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="SetRedirectAllPermProcessing"/>
+        <shortDescription xmi:type="utility:ConstantString" string="RedirectAllPermanent"/>
+        <longDescription xmi:type="utility:ConstantString" string="Redirect the original failed event, all blocked events of the same GroupID and any new events of the same GroupID to the alternative out path&#xD;&#xA;"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_21" location="384,247" destination="file" filePath="c:\temp\FEM\traces\TrcTWrpRedirClear.txt" pattern="-- root&#xD;&#xA;${Root}&#xD;&#xA;">
+        <translation xmi:type="utility:ConstantString" string="TrcTWrpRedirClear"/>
+      </nodes>
+      <nodes xmi:type="IOBKWrapper.subflow:FCMComposite_1" xmi:id="FCMComposite_1_3" location="623,196">
+        <translation xmi:type="utility:ConstantString" string="IOBKWrapper"/>
+        <shortDescription xmi:type="utility:ConstantString" string="Wrapper provides the failed event management capability by adding state information to an MQRFH2 header such that downstream failed events are caught propagated to the failure terminal. Any future messages in the same group as a failed event are blocked until the original is replayed"/>
+        <longDescription xmi:type="utility:ConstantString" string="The Wrapper accepts new messages via the In terminal. The Wrapper accepts replayed messages via the Control Terminal.&#xD;&#xA;&#xD;&#xA;This Wrapper Control terminal supports the following Failed Event Management operator actions which must be set in the MQRFH2.usr.IOBK.ReplayAction field by Tooling Wrapper or message flow/subflow that drives the control terminal.&#xD;&#xA;&#xD;&#xA; ReplayOnly: &#x9;&#x9;&#x9;Replay the original failed event directing it to is original out path and release all blocked events of the same GroupID to the original out path&#xD;&#xA; RedirectFirstOnly:&#x9;       Redirect the original failed event to an alternative out path and release all blocked events of the same GroupID to the original out path&#xD;&#xA; RedirectAll:&#x9;&#x9;&#x9;Redirect the original failed event and all blocked events of the same GroupID to the alternative out path. &#x9;&#x9;&#x9;&#xD;&#xA; RedirectAllPermanent: Redirect the original failed event, all blocked events of the same GroupID and any new events of the same GroupID to the alternative out path&#xD;&#xA; ClearRedirectAllPerm:  Manually clear the RedirectAllPermanent for the GroupID - this function does not propagate the event to an out path."/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="479,308" destination="file" filePath="c:\temp\FEM\traces\TrcTWrpIn.txt" pattern="-- root&#xD;&#xA;${Root}&#xD;&#xA;">
+        <translation xmi:type="utility:ConstantString" string="TrcTWrpIn"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_22" location="173,466" destination="file" filePath="c:\temp\FEM\traces\TrcTWrpCtrl.txt" pattern="-- root&#xD;&#xA;${Root}&#xD;&#xA;">
+        <translation xmi:type="utility:ConstantString" string="TrcTWrpCtrl"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_23" location="842,254" destination="file" filePath="c:\temp\FEM\traces\TrcTWrpFail.txt" pattern="-- root&#xD;&#xA;${Root}&#xD;&#xA;">
+        <translation xmi:type="utility:ConstantString" string="TrcTWrpFail"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_9" sourceNode="InTerminal.Input" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.true" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_17" sourceNode="FCMComposite_1_15" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_20" sourceNode="FCMComposite_1_18" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_15" targetNode="FCMComposite_1_19" sourceNode="FCMComposite_1_16" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_19" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_20" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_20" targetNode="FCMComposite_1_21" sourceNode="FCMComposite_1_19" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_21" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input1"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="OutTerminal.Output" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_14" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.Output1" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_16" targetNode="OutTerminal.Output1" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.Output2" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_17" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.false" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_18" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_12" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_22" targetNode="FCMComposite_1_22" sourceNode="InTerminal.Input1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_24" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_22" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_25" targetNode="FCMComposite_1_23" sourceNode="FCMComposite_1_14" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_26" targetNode="OutTerminal.Output3" sourceNode="FCMComposite_1_23" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_21" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.ReplayQueues" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.mq.MQQueueNameEditor" configurable="true" describedAttribute="Property.FatalQueueName">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.FatalQueueName" bundleName="IOBKToolingWrapper" pluginId="IOBKApplication"/>
+        <propertyDescriptor groupName="Group.ReplayQueues" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.mq.MQQueueNameEditor" configurable="true" describedAttribute="Property.ReDirFirstQueueName">
+          <propertyName xmi:type="utility:TranslatableString" key="Property.ReDirFirstQueueName" bundleName="IOBKToolingWrapper" pluginId="IOBKApplication"/>
+          <propertyDescriptor groupName="Group.ReplayQueues" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.mq.MQQueueNameEditor" configurable="true" describedAttribute="Property.ReDirAllQueueName">
+            <propertyName xmi:type="utility:TranslatableString" key="Property.ReDirAllQueueName" bundleName="IOBKToolingWrapper" pluginId="IOBKApplication"/>
+            <propertyDescriptor groupName="Group.ReplayQueues" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.mq.MQQueueNameEditor" configurable="true" describedAttribute="Property.ReplayQueueName">
+              <propertyName xmi:type="utility:TranslatableString" key="Property.ReplayQueueName" bundleName="IOBKToolingWrapper" pluginId="IOBKApplication"/>
+              <propertyDescriptor groupName="Group.ReplayQueues" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.mq.MQQueueNameEditor" configurable="true" describedAttribute="Property.ReDirAllPermQueueName">
+                <propertyName xmi:type="utility:TranslatableString" key="Property.ReDirAllPermQueueName" bundleName="IOBKToolingWrapper" pluginId="IOBKApplication"/>
+                <propertyDescriptor groupName="Group.ReplayQueues" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.mq.MQQueueNameEditor" configurable="true" describedAttribute="Property.ReDirAllClearQueueName">
+                  <propertyName xmi:type="utility:TranslatableString" key="Property.ReDirAllClearQueueName" bundleName="IOBKToolingWrapper" pluginId="IOBKApplication"/>
+                  <propertyDescriptor groupName="Group.Basic" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.xpath.XPathPropertyEditor:InputRoot,InputLocalEnvironment,InputBody,InputEnvironment,Root,LocalEnvironment,Body,Environment" describedAttribute="Property.correlationPath">
+                    <propertyName xmi:type="utility:TranslatableString" key="Property.correlationPath" bundleName="ComIbmReSequence" pluginId="com.ibm.etools.mft.ibmnodes"/>
+                  </propertyDescriptor>
+                </propertyDescriptor>
+              </propertyDescriptor>
+            </propertyDescriptor>
+          </propertyDescriptor>
+        </propertyDescriptor>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <attributeLinks promotedAttribute="Property.FatalQueueName" overriddenNodes="FCMComposite_1_15">
+      <overriddenAttribute href="ComIbmMQInput.msgnode#Property.queueName"/>
+    </attributeLinks>
+    <attributeLinks promotedAttribute="Property.ReDirFirstQueueName" overriddenNodes="FCMComposite_1_6">
+      <overriddenAttribute href="ComIbmMQInput.msgnode#Property.queueName"/>
+    </attributeLinks>
+    <attributeLinks promotedAttribute="Property.ReDirAllQueueName" overriddenNodes="FCMComposite_1_4">
+      <overriddenAttribute href="ComIbmMQInput.msgnode#Property.queueName"/>
+    </attributeLinks>
+    <attributeLinks promotedAttribute="Property.ReplayQueueName" overriddenNodes="FCMComposite_1_2">
+      <overriddenAttribute href="ComIbmMQInput.msgnode#Property.queueName"/>
+    </attributeLinks>
+    <attributeLinks promotedAttribute="Property.ReDirAllPermQueueName" overriddenNodes="FCMComposite_1_18">
+      <overriddenAttribute href="ComIbmMQInput.msgnode#Property.queueName"/>
+    </attributeLinks>
+    <attributeLinks promotedAttribute="Property.ReDirAllClearQueueName" overriddenNodes="FCMComposite_1_16">
+      <overriddenAttribute href="ComIbmMQInput.msgnode#Property.queueName"/>
+    </attributeLinks>
+    <attributeLinks promotedAttribute="Property.correlationPath" overriddenNodes="FCMComposite_1_3">
+      <overriddenAttribute href="IOBKWrapper.subflow#Property.correlationPath"/>
+    </attributeLinks>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

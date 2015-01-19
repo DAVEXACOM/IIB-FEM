@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<script progid="%W% %I%" progname="IBM Integration API (CMP) Exerciser" progver="8.0">
+    <method name="testConnectToLocalBroker" owner="classTesterBroker">
+        <parameter type="java.lang.String" value="IB9NODE"/>
+    </method>
+    <method name="testConnectToLocalBroker" owner="classTesterBroker">
+        <parameter type="java.lang.String" value="IB9NODE"/>
+    </method>
+    <method name="copyTableCellValue" owner="this"/>
+    <method name="testStopMsgFlows" owner="classTesterMisc">
+        <parameter type="com.ibm.broker.config.proxy.AdministeredObject" value="IB9NODE/default/.../FEMTestHarnessproject.generated.bar/FEMTestHarness.appzip/.../FEMTestHarnessproject.generated.bar/IOBKContainerFlow.msgflow"/>
+    </method>
+    <method name="testRefresh" owner="classTesterAdministeredObject">
+        <parameter type="com.ibm.broker.config.proxy.AdministeredObject" value="IB9NODE/default/.../FEMTestHarnessproject.generated.bar/FEMTestHarness.appzip/.../FEMTestHarnessproject.generated.bar/IOBKContainerFlow.msgflow"/>
+    </method>
+</script>

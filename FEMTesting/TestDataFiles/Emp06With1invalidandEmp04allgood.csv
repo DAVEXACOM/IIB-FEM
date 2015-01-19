@@ -1,0 +1,7 @@
+emp06,9917,1,good,data2,contract,data3
+emp04,9910,1,good,data2,permanent,data3
+emp06,9918,2,bad,data2,contract,AFTER
+emp04,9912,2,good,data2,permanent,data3
+emp06,9919,3,good,data2,contract,data3
+emp04,9913,3,good,data2,permanent,data3
+emp04,9915,4,good,data2,permanent,data3

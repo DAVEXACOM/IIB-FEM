@@ -1,0 +1,24 @@
+
+DECLARE ExceptionMode SHARED BOOLEAN false;
+
+CREATE COMPUTE MODULE StopFlow_SetExceptionModeOn
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+-- We are going to stop the flow. Set Exception Mode on to throw an exception if any new messages sneak in
+-- Given we should be single threaded on the input from the main flow, I don't believe new messages can sneak in this is a fail safe		
+		Set ExceptionMode = true;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE StopFlow_GetAppandFlowName
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+-- Get the name of the containing application (if applications are being used) and containing message flow we are running in 		
+		Set Environment.APPLNAME = ApplicationLabel;
+		Set Environment.FLOWNAME = MessageFlowLabel;
+		RETURN TRUE;
+	END;
+END MODULE;

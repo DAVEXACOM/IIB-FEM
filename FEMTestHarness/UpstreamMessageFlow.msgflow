@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCollector.msgnode="ComIbmCollector.msgnode" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmFileInput.msgnode="ComIbmFileInput.msgnode" xmlns:ComIbmMQHeader.msgnode="ComIbmMQHeader.msgnode" xmlns:ComIbmMQInput.msgnode="ComIbmMQInput.msgnode" xmlns:ComIbmMQOutput.msgnode="ComIbmMQOutput.msgnode" xmlns:ComIbmTrace.msgnode="ComIbmTrace.msgnode" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow"
+    xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="UpstreamMessageFlow.msgflow"
+    nsPrefix="UpstreamMessageFlow.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="UpstreamMessageFlow" bundleName="UpstreamMessageFlow" pluginId="FEMTestHarness"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMTestHarness/icons/full/obj16/UpstreamMessageFlow.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMTestHarness/icons/full/obj30/UpstreamMessageFlow.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmFileInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="59,133" inputDirectory="c:\temp\FEM\infiles" filenamePattern="*.csv" processedFileAction="moveToArchive" replaceDuplicateArchives="true" messageDomainProperty="DFDL" messageTypeProperty="{}:sampleRecs" recordDetection="delimited">
+        <translation xmi:type="utility:ConstantString" string="FileInFEM"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="193,129" destination="file" filePath="c:\temp\FEM\traces\TrcUpstreamIn.txt" pattern="${Root}">
+        <translation xmi:type="utility:ConstantString" string="TrcUpstreamIn"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="857,214" queueName="FEM.UPSTREAM.FEED.Q">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.FEED.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQHeader.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="299,129" mqmdAAAOptions="Add header" mqmdCodedCharSetId="MQCCSI_Q_MGR" mqmdFormat="MQFMT_NONE" mqmdVersion="MQMD_VERSION_1" mqmdMsgType="MQMT_DATAGRAM" mqmdExpiry="MQEI_UNLIMITED" mqmdFeedback="MQFB_NONE" mqmdPriority="MQPRI_PRIORITY_AS_Q_DEF" mqmdPersistence="MQPER_PERSISTENCE_AS_Q_DEF" mqmdMsgId="MQMI_NONE" mqmdCorrelId="MQCI_NONE">
+        <translation xmi:type="utility:ConstantString" string="MQ Header"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="285,218" queueName="FEM.UPSTREAM.CONTROL.Q" messageDomainProperty="BLOB">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.CONTROL.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="542,126" destination="file" filePath="c:\temp\FEM\traces\TrcUpstreamOut1.txt" pattern="${Root}">
+        <translation xmi:type="utility:ConstantString" string="TrcUpstreamOut1"/>
+      </nodes>
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="775,233" destination="file" filePath="c:\temp\FEM\traces\TrcUpstreamOut.txt" pattern="${Root}">
+        <translation xmi:type="utility:ConstantString" string="TrcUpstreamOut"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="689,126" computeExpression="esql://routine/#UpstreamMessageFlow_MoveDataFromCollection.Main">
+        <translation xmi:type="utility:ConstantString" string="MoveDataFromCollection"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="588,180" queueName="FEM.UPSTREAM.ERROR.Q">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.ERROR.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCollector.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="469,202" collectionName="INVOICES_BATCH" collectionExpiry="180" eventCoordination="FirstCompleteCollection">
+        <inTerminals terminalNodeID="IN4" dynamic="true" label="IN4"/>
+        <translation xmi:type="utility:ConstantString" string="forwardOnTrigger"/>
+        <eventHandlerPropertyTable terminal="IN4" quantity="1" correlationPath="" correlationPattern=""/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="19,300" queueName="FEM.UPSTREAM.EMP01.Q" messageDomainProperty="DFDL" messageTypeProperty="{}:sampleRecs">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.EMP01.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_13" location="34,368" queueName="FEM.UPSTREAM.EMP02.Q" messageDomainProperty="DFDL" messageTypeProperty="{}:sampleRecs">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.EMP02.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_14" location="140,403" queueName="FEM.UPSTREAM.EMP03.Q" messageDomainProperty="DFDL" messageTypeProperty="{}:sampleRecs">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.EMP03.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_15" location="278,429" queueName="FEM.UPSTREAM.EMP04.Q" messageDomainProperty="DFDL" messageTypeProperty="{}:sampleRecs">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.EMP04.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_16" location="418,410" queueName="FEM.UPSTREAM.EMP05.Q" messageDomainProperty="DFDL" messageTypeProperty="{}:sampleRecs">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.EMP05.Q"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_17" location="542,389" queueName="FEM.UPSTREAM.EMP06.Q" messageDomainProperty="DFDL" messageTypeProperty="{}:sampleRecs">
+        <translation xmi:type="utility:ConstantString" string="FEM.UPSTREAM.EMP06.Q"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.control"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.expire" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_22" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_17" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_23" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_16" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_24" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_15" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_25" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_14" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_26" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_13" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_27" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard>
+      <stickyNote location="435,10" association="FCMComposite_1_6">
+        <body xmi:type="utility:ConstantString" string="Trigger via any msg&#xA;here to let one thru&#xA;from the file"/>
+      </stickyNote>
+      <stickyNote location="459,305">
+        <body xmi:type="utility:ConstantString" string="Individual Message&#xA;insertion"/>
+      </stickyNote>
+      <stickyNote location="24,50">
+        <body xmi:type="utility:ConstantString" string="Batch File Feed"/>
+      </stickyNote>
+      <stickyNote location="670,42" association="FCMComposite_1_9">
+        <body xmi:type="utility:ConstantString" string="CollectorTrigger&#xA;turned off at mo!!"/>
+      </stickyNote>
+    </stickyBoard>
+  </eClassifiers>
+</ecore:EPackage>

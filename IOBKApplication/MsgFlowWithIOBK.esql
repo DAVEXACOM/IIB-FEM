@@ -1,0 +1,27 @@
+
+-- This is test harness stuff just to force a down stream exception based on AFTER in the data
+CREATE FILTER MODULE MsgFlowWithIOBK1_ThrowOnFAILB4
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF CONTAINS(Root.DFDL.sampleRecs.record[1].Data3,'FAILB4')THEN 
+			-- throw an exception before we get to IOBK subflow EMP05 message number 1
+			RETURN TRUE;
+		END IF;
+		RETURN FALSE;
+	END;
+
+END MODULE;
+
+-- This is test harness stuff just to force a down stream exception based on AFTER in the data
+CREATE FILTER MODULE MsgFlowWithIOBK1_ThrowOnAFTER
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF CONTAINS(Root.DFDL.sampleRecs.record[1].Data3,'AFTER')THEN 
+			-- throw an exception after the IOBK subflow
+			RETURN TRUE;
+		END IF;
+		RETURN FALSE;
+	END;
+
+END MODULE;
+

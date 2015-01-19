@@ -1,0 +1,153 @@
+--
+-- This Tooling Wrapper implements the following Failed Event Management operator actions
+-- ReplayOnly: 			Replay the original failed event directing it to is original out path and release all blocked events of the same GroupID to the original out path
+-- RedirectFirstOnly:	Redirect the original failed event to an alternative out path and release all blocked events of the same GroupID to the original out path
+-- RedirectAll:			Redirect the original failed event and all blocked events of the same GroupID to the alternative out path. 			
+-- RedirectAllPermanent:Redirect the original failed event, all blocked events of the same GroupID and any new events of the same GroupID to the alternative out path
+-- ClearRedirectAllPerm:Manually clear the RedirectAllPermanent for the GroupID - this function does not propagate the event to an out path.
+--		 
+
+CREATE COMPUTE MODULE IOBKToolingWrapper_SetReplayProcessing
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+			SET OutputRoot = InputRoot;
+			SET OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'ReplayOnly'; 
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE IOBKToolingWrapper_SetRedirectFirstProcessing
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+			SET OutputRoot = InputRoot;		
+			SET OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'RedirectFirstOnly'; 
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE IOBKToolingWrapper_SetRedirectAllProcessing
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+			SET OutputRoot = InputRoot;
+			SET OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'RedirectAll';		
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE IOBKToolingWrapper_SetRedirectAllPermProcessing
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+			SET OutputRoot = InputRoot;
+			SET OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'RedirectAllPermanent'; -- ReplayOnly, RedirectAll,RedirectAllPermanent RedirectFirstOnly;			
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE COMPUTE MODULE IOBKToolingWrapper_ClearRedirectAllPermByGroupID
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN   -- manually stop redirecting by GroupID
+			SET OutputRoot = InputRoot;			
+			SET OutputRoot.MQRFH2.usr.IOBK.ReplayAction = 'ClearRedirectAllPerm';
+		RETURN TRUE;
+	END;
+END MODULE;
+
+CREATE FILTER MODULE IOBKToolingWrapper_ExceptionModeFlagSet
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+-- Route to the throw node. Throw an exception if a new message sneaks in while we are stopping the message flow
+-- There may be a case for placing an ExceptionmodeFlagSet check on connections to the Wrapper subflow control terminal
+-- to stop replayed events being processed while the message flow is being stopped.		
+		IF ExceptionMode = true THEN 
+			RETURN TRUE;
+		END IF;
+		RETURN FALSE;
+	END;
+END MODULE;
+--
+-- The EvtMgr capture key information about the failed event and store it temporarily in the Environment
+-- This ToolingWrapper uses the IIB monitoring framework to emit details of the failed event and includes a bitstream of the original data.
+-- Note: The Wrapper will have inserted an MQRFH2 header at the head of the data. This houses key information (GroupID and sequence number) that must
+-- survive the trip through operator tooling. In this case the IIB Record and Replay service.
+-- The Evtmgr will use the Monitoring Tab to config the event. It populates the following event fields with information
+-- Event Name					: $Environment/Exception/SaFUUID 	- BrokerName.ExecutionGroupLabel.[ApplicationLabel].MessageFlowLabel - uniquely identify the origin of the event 
+-- Local Transaction correlator	: $Environment/Exception/chrNumber	- Exception Number
+-- Parent Transaction correlator: $Environment/Exception/Text		- Exception Text
+-- Global Transaction correlator: $Environment/Exception/userText	- User Text
+--
+CREATE COMPUTE MODULE IOBKToolingWrapper_IOBKEvtMgr
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputRoot = InputRoot;
+--  The Event Name, Local, parent and global IDs are limited to VARCHAR 100 in the record and replay DB schema
+--  Build EVENT NAME field.
+		IF ApplicationLabel IS NOT null THEN -- Message flows do not have to exist in an application.
+			Set Environment.SaFUUID = SUBSTRING(BrokerName||'.'||ExecutionGroupLabel||'.'||ApplicationLabel||'.'||MessageFlowLabel FROM 1 FOR 100);
+		ELSE
+			Set Environment.SaFUUID = SUBSTRING(BrokerName||'.'||ExecutionGroupLabel||'.'||MessageFlowLabel FROM 1 FOR 100);			
+		END IF;
+--  Build the Local, parent and global transaction correlators
+		Set Environment.Exception.chrNumber = '9999';
+		Set Environment.Exception.Text = 'Placeholder for exception detail';		
+		Set Environment.Exception.userText = 'Placeholder for user detail';
+--  Get the real exception details and populate the Environment fields that will be reference on the monitoring tab for this Compute Node.		
+        CALL getLastExceptionDetail(InputExceptionList, Environment.Exception.Number, Environment.Exception.Text, Environment.Exception.userText);	
+--  Format and set max lengths for the ID fields in the event.
+        Set Environment.Exception.chrNumber = CAST(Environment.Exception.Number AS CHARACTER);
+		IF LENGTH(Environment.Exception.Text)> 100 THEN SET Environment.Exception.Text = SUBSTRING(Environment.Exception.Text FROM 1 FOR 100); END IF;
+		IF LENGTH(Environment.Exception.userText)> 100 THEN SET Environment.Exception.userText = SUBSTRING(Environment.Exception.userText FROM 1 FOR 100); END IF;
+        RETURN TRUE;
+	END;
+		
+-- @DA@ Nice procedure for looking for specific exceptions. Might be handy for the FATAL exceptions - Currently not used
+--		DECLARE foundMatch BOOLEAN;
+--		SET foundMatch = FALSE;
+--		CALL navigate (InputExceptionList,  foundMatch, 'Text', 'The error text we are looking for.');			
+--		CALL navigate (InputExceptionList,  foundMatch, 'Number', '3049');
+	
+		
+	CREATE PROCEDURE getLastExceptionDetail(IN InputTree reference,OUT messageNumber integer,OUT messageText char,OUT userText char)	
+    /****************************************************************************
+	 * A procedure that will get the details of the last exception from a message
+	 * IN InputTree:  The incoming exception list
+	 * OUT exception message Number:  The last message number.
+	 * OUT exception message Text: The last message text.
+	 * OUT exception message userText: the last message user text 
+	 *****************************************************************************/
+   		BEGIN
+   	    -- Create a reference to the first child of the exception list
+   	    declare ptrException reference to InputTree.*[1];
+   	    -- keep looping while the moves to the child of exception list work 
+		WHILE lastmove(ptrException) DO
+			-- store the current values for the error number and text
+			IF ptrException.Number is not null THEN
+        		SET messageNumber = ptrException.Number;
+        		SET messageText = ptrException.Text;
+        		SET userText = ptrException.Insert.Text;
+  			END IF;
+  			-- now move to the last child which should be the next exceptionlist
+			move ptrException lastchild;
+		END WHILE; 
+   		END;
+-- @DA@ Nice procedure for looking for specific exceptions. Might be handy for the FATAL exceptions  - currently not used 		
+	CREATE PROCEDURE navigate (IN root REFERENCE, INOUT foundMatch BOOLEAN, IN searchField CHAR, IN searchText CHAR)
+		BEGIN
+   			DECLARE LookFor CHARACTER;
+   			DECLARE MatchingPattern CHARACTER; 
+   			DECLARE cursor REFERENCE TO root;
+   			SET MatchingPattern = FIELDNAME(root);
+   			MOVE cursor FIRSTCHILD;
+   			IF LASTMOVE(cursor) THEN
+   				ELSE 
+      				IF MatchingPattern = searchField THEN
+        				IF CAST(root AS CHARACTER) = searchText THEN
+           				SET foundMatch = TRUE;
+        				END IF;
+      				END IF;
+   			END IF;
+   			WHILE LASTMOVE(cursor) AND (foundMatch = FALSE) DO
+       			CALL navigate(cursor, foundMatch, searchField, searchText);
+       		MOVE cursor NEXTSIBLING;
+   			END WHILE; 
+		END;   		
+END MODULE;
