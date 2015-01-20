@@ -18,4 +18,8 @@ Supported re-submission options are:
 4.	RedirectAllPermanent: Redirect the original failed event, all blocked events of the same GroupID and any new events of the same GroupID to the alternative out path
 5.	ClearRedirectAllPerm:  Manually clear the RedirectAllPermanent for the GroupID - this function does not propagate the event to an out path.
 
+Detailed documentation can be found in the PDFs located in the FEMDocumentation folder.
+Sample test data and a harness to drive it are provided.
+Sample scripts for the set up of IIB Record and Replay and a test MQ environment are provided
+
 If you wish to contribute please email Dave - davearno@au1.ibm.com
