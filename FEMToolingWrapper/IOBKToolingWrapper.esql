@@ -1,3 +1,12 @@
+/* Copyright (c) 2013 IBM Corporation and other Contributors
+
+ All rights reserved. This program and the accompanying materials
+ are made available under the terms of the Eclipse Public License v1.0
+ which accompanies this distribution, and is available at
+ http://www.eclipse.org/legal/epl-v10.html
+ 
+ Contributors:
+     IBM - initial API and implementation */
 --
 -- This Tooling Wrapper implements the following Failed Event Management operator actions
 -- ReplayOnly: 			Replay the original failed event directing it to is original out path and release all blocked events of the same GroupID to the original out path

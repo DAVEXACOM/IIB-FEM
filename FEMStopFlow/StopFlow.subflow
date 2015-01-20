@@ -7,8 +7,8 @@
     <translation xmi:type="utility:TranslatableString" key="StopFlow" bundleName="StopFlow" pluginId="FEMStopFlow"/>
     <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMStopFlow/icons/full/obj16/StopFlow.gif"/>
     <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/FEMStopFlow/icons/full/obj30/StopFlow.gif"/>
-    <shortDescription xmi:type="utility:ConstantString" string="Stop the Containing Message Flow "/>
-    <longDescription xmi:type="utility:ConstantString" string="This subflow performs the following:&#xD;&#xA;&#x9;Determines identity of the containing message flow.&#xD;&#xA;&#x9;Issues a request to the IIB node (broker) to stop the containing message flow&#xD;&#xA;&#x9;Sets Exception Mode On (fail safe against multi-threaded containing message flows&#xD;&#xA;&#x9;Emits an IIB Monitoring Event - FATAL event&#xD;&#xA;&#x9;Ends such that the containing flow can be stopped."/>
+    <shortDescription xmi:type="utility:ConstantString" string="Stop the Containing Message Flow - Copyright (c) 2013 IBM Corporation and other Contributors"/>
+    <longDescription xmi:type="utility:ConstantString" string="This subflow performs the following:&#xD;&#xA;&#x9;Determines identity of the containing message flow.&#xD;&#xA;&#x9;Issues a request to the IIB node (broker) to stop the containing message flow&#xD;&#xA;&#x9;Sets Exception Mode On (fail safe against multi-threaded containing message flows&#xD;&#xA;&#x9;Emits an IIB Monitoring Event - FATAL event&#xD;&#xA;&#x9;Ends such that the containing flow can be stopped.&#xD;&#xA;&#xD;&#xA;"/>
     <composition>
       <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input" location="20,20">
         <translation xmi:type="utility:TranslatableString" key="InTerminal.Input" bundleName="StopFlow" pluginId="FEMStopFlow"/>
