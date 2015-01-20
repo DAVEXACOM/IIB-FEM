@@ -10,10 +10,12 @@ The IBM products, WebSphere Process Server and WebSphere Enterprise Service Bus 
 
 The operational tooling is facilitated by the IIB Record and Replay capability. A FEMToolingWrapper subflow is supplied to wrapper the runtime FEMU subflows enabling resubmission of failed events via the IIB Web GUI.
 
-Support resubmission options are:
+Support re-submission options are:
 
 1.	ReplayOnly: Replay the original failed event directing it to is original out path and release all blocked events of the same GroupID to the original out path
 2.	RedirectFirstOnly: Redirect the original failed event to an alternative out path and release all blocked events of the same GroupID to the original out path
 3.	RedirectAll: Redirect the original failed event and all blocked events of the same GroupID to the alternative out path. 			
 4.	RedirectAllPermanent: Redirect the original failed event, all blocked events of the same GroupID and any new events of the same GroupID to the alternative out path
 5.	ClearRedirectAllPerm:  Manually clear the RedirectAllPermanent for the GroupID - this function does not propagate the event to an out path.
+
+If you wish to contribute please email Dave - davearno@au1.ibm.com
