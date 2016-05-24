@@ -49,7 +49,7 @@ public class StopFlow_AsyncStopFlow extends MbJavaComputeNode {
 				     // request that the broker stop the flow.
 				     mLocal.stop();
 				}
-			// End of user code			     
+			// End of user code	 		     
 			// ----------------------------------------------------------
 		} catch (MbException e) {
 			// Re-throw to allow Broker handling of MbException
